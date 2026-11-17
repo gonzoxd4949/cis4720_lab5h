@@ -471,19 +471,19 @@ BEGIN
     END IF;
 END;
 
--- Get the standing for student 7 and display it.
+-- Get student 7 and display it.
 CALL student_standing(7, @standing);
 SELECT @standing;
 
--- Get the standing for student 3 and display it.
+-- Get student 3 and display it.
 CALL student_standing(3, @standing);
 SELECT @standing;
 
--- Get the standing for student 1 and display it.
+-- Get student 1 and display it.
 CALL student_standing(1, @standing);
 SELECT @standing;
 
--- Get the standing for student 4 and display it.
+-- Get student 4 and display it.
 CALL student_standing(4, @standing);
 SELECT @standing;
 
@@ -519,13 +519,13 @@ BEGIN
     END IF;
 END;
 
--- Test a negative score; it should be refused.
+-- Test a negative score, it should be refused.
 CALL add_score('quiz5', 4, -20);
 
--- Test a score above 100; it should be refused.
+-- Test a score above 100, it should be refused.
 CALL add_score('quiz5', 4, 120);
 
--- Test a valid score; Robert's GPA should become 85.75.
+-- Test a valid score, Robert's GPA should become 85.75.
 CALL add_score('quiz5', 2, 91);
 
 -- Check the students GPA after the tests.
@@ -535,10 +535,29 @@ CALL list_students();
 -- =================================================================
 -- STEP 10. Rebuild record_attendance so it checks the student
 -- =================================================================
+ --drop add_score
+ drop proceddure add_score;
+
+ --Copy procedure from instructuins and modify it. 
+ -- add_score will validate the score
 
 
+ -- adds a score only when it is a real score.
+ CREATE PROCEDURE add_score(IN p_test_name VARCHAR(20),
+    IN p_student_id INT,
+    IN p_score FLOAT)
+    BEGIN
+    IF p_score < 0 OR p_score > 100 THEN
+        SELECT 'Score must be between 0 and 100' AS message;
+    ELSE
+        INSERT INTO test_scores (test_name, student_id, score)
+        VALUES (p_test_name, p_student_id, p_score);
 
-
+        UPDATE students
+        SET gpa = calculate_gpa(p_student_id)
+        WHERE student_id = p_student_id;
+    END IF;
+END;
 -- =================================================================
 -- STEP 11 and 12. Push to GitHub and submit the URL
 -- =================================================================
